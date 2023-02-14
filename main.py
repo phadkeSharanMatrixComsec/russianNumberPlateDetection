@@ -27,14 +27,14 @@ def enlarge_plt_display(image, scale_factor):
 
     cv2.imwrite("result.png", image)
 
-def carplate_extract(image):
+def carplate_extract(image, carplate_haar_cascade):
     
     carplate_rects = carplate_haar_cascade.detectMultiScale(image,scaleFactor=1.1, minNeighbors=5) 
 
     for x,y,w,h in carplate_rects: 
-        carplate_img = image[y+15:y+h-10 ,x+15:x+w-20] 
+        carplate_img_extract = image[y+15:y+h-10 ,x+15:x+w-20] 
         
-    return carplate_img
+    return carplate_img_extract
 
 def enlarge_img(image, scale_percent):
     width = int(image.shape[1] * scale_percent / 100)
@@ -44,25 +44,29 @@ def enlarge_img(image, scale_percent):
     return resized_image
 
 
+def convertToText(carplate_img):
+    #Detection  
+    carplate_img_rgb = cv2.cvtColor(carplate_img, cv2.COLOR_BGR2RGB)
 
-#Detection  
-carplate_img = cv2.imread('Cars25.png')
-carplate_img_rgb = cv2.cvtColor(carplate_img, cv2.COLOR_BGR2RGB)
-
-carplate_haar_cascade = cv2.CascadeClassifier('haarcascade_russian_plate_number.xml')
-detected_carplate_img = carplate_detect(carplate_img_rgb, carplate_haar_cascade)
-enlarge_plt_display(detected_carplate_img, 1.2) 
-
-
-#OCR
-carplate_extract_img = carplate_extract(carplate_img_rgb)
-carplate_extract_img = enlarge_img(carplate_extract_img, 150)
-carplate_extract_img_gray = cv2.cvtColor(carplate_extract_img, cv2.COLOR_RGB2GRAY)
-carplate_extract_img_gray_blur = cv2.medianBlur(carplate_extract_img_gray,3) # Kernel size 3
-
-text = pytesseract.image_to_string(carplate_extract_img_gray_blur, 
-                                  config = f'--psm 8 --oem 3 -c tessedit_char_whitelist=ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789')
+    carplate_haar_cascade = cv2.CascadeClassifier('haarcascade_russian_plate_number.xml')
+    detected_carplate_img = carplate_detect(carplate_img_rgb, carplate_haar_cascade)
+    enlarge_plt_display(detected_carplate_img, 1.2) 
 
 
-text = re.sub('[^A-Za-z0-9]+', '', text)
-print("text : ", text)
+    #OCR
+    carplate_extract_img = carplate_extract(carplate_img_rgb, carplate_haar_cascade)
+    carplate_extract_img = enlarge_img(carplate_extract_img, 150)
+    carplate_extract_img_gray = cv2.cvtColor(carplate_extract_img, cv2.COLOR_RGB2GRAY)
+    carplate_extract_img_gray_blur = cv2.medianBlur(carplate_extract_img_gray,3) # Kernel size 3
+
+    text = pytesseract.image_to_string(carplate_extract_img_gray_blur, 
+                                    config = f'--psm 8 --oem 3 -c tessedit_char_whitelist=ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789')
+
+
+    text = re.sub('[^A-Za-z0-9]+', '', text)
+    print("text : ", text)
+
+    return text
+
+carplate_img = cv2.imread('Cars14.png')
+print(convertToText(carplate_img))
