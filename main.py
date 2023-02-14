@@ -63,10 +63,9 @@ def convertToText(carplate_img):
                                     config = f'--psm 8 --oem 3 -c tessedit_char_whitelist=ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789')
 
 
-    text = re.sub('[^A-Za-z0-9]+', '', text)
     print("text : ", text)
-
+    text = re.sub('[^A-Za-z0-9]+', '', text)
     return text
 
-carplate_img = cv2.imread('Cars14.png')
-print(convertToText(carplate_img))
+# carplate_img = cv2.imread('Cars19.png')
+# print(convertToText(carplate_img))
